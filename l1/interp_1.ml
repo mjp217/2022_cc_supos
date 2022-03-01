@@ -20,7 +20,8 @@ let complain = Errors.complain
 type address = int 
 
 type value = 
-     | INT of int 
+     | INT of int
+     | EXP_V of int * int * int
 
 and closure = var * expr * env 
 
@@ -69,6 +70,12 @@ let do_oper = function
   | (SUB,  INT m,   INT n)  -> INT (m - n)
   | (MUL,  INT m,   INT n)  -> INT (m * n)
   | (DIV,  INT m,   INT n)  -> INT (m / n)
+  | (EXP,  EXP_V (n, a, m), _) -> if m < 1 then INT 1
+                               else if m = 1 then INT (a * n)
+                               else EXP_V (n, a*n, m-1)
+  | (EXP,  INT m,   INT n)  -> if n < 1 then INT 1
+                               else if n = 1 then INT m
+                               else EXP_V (m, m, n-1)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
 
@@ -81,7 +88,8 @@ let string_of_list sep f l =
 
 
 let rec string_of_value = function 
-     | INT n          -> string_of_int n 
+     | INT n           -> string_of_int n
+     | EXP_V (n, a, m) -> string_of_int a ^ " * (" ^ string_of_int n ^ " ^ " ^ string_of_int m ^ ")"
 
 and string_of_closure (x, e, env) = x ^ ", " ^ (Ast.string_of_expr e) ^  ", " ^ (string_of_env env)
 
@@ -126,13 +134,15 @@ let step = function
  | EXAMINE(Seq [e],                     env, k) -> EXAMINE(e, env, k) 
  | EXAMINE(Seq (e :: rest),             env, k) -> EXAMINE(e, env, TAIL (rest, env) :: k) 
  (* EXAMINE --> COMPUTE *) 
- | EXAMINE(Integer n,         _, k) -> COMPUTE(k, INT n) 
+ | EXAMINE(Integer n,                     _, k) -> COMPUTE(k, INT n)
+ (* Computing exponential values *)
+ | COMPUTE(k,                EXP_V (v, v1, v2)) -> COMPUTE(k, do_oper(EXP, EXP_V (v, v1, v2), INT 0))
  (* COMPUTE --> COMPUTE *) 
- | COMPUTE((UNARY op) :: k,    v) -> COMPUTE(k ,(do_unary(op, v)))
- | COMPUTE(OPER(op, v1) :: k, v2) -> COMPUTE(k, do_oper(op, v1, v2))
+ | COMPUTE((UNARY op) :: k,                  v) -> COMPUTE(k ,(do_unary(op, v)))
+ | COMPUTE(OPER(op, v1) :: k,               v2) -> COMPUTE(k, do_oper(op, v1, v2))
  (* COMPUTE --> EXAMINE *) 
- | COMPUTE(OPER_FST (e2, env, op) :: k,         v1)  -> EXAMINE(e2, env, OPER (op, v1) :: k)
- | COMPUTE((TAIL (el, env)) :: k,     _)  ->  EXAMINE(Seq el, env, k) 
+ | COMPUTE(OPER_FST (e2, env, op) :: k,     v1)  -> EXAMINE(e2, env, OPER (op, v1) :: k)
+ | COMPUTE((TAIL (el, env)) :: k,            _)  ->  EXAMINE(Seq el, env, k)
  | state -> complain ("step : malformed state = " ^ (string_of_state state) ^ "\n")
 
 let rec driver n state = 
@@ -140,8 +150,8 @@ let rec driver n state =
           then print_string ("\nstate " ^ (string_of_int n) ^ " = \n" ^ (string_of_state state) ^ "\n")
           else () 
   in match state with 
-     | COMPUTE([], v) -> v 
-     | _              -> driver (n + 1) (step state) 
+     | COMPUTE([], INT v) -> INT v
+     | _                  -> driver (n + 1) (step state)
 
 let eval(e, env) = driver 1 (EXAMINE(e, env, []))
 

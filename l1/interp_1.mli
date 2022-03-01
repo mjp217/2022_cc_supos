@@ -2,7 +2,8 @@
 type address = int 
 
 type value = 
-     | INT of int 
+     | INT of int
+     | EXP_V of int * int * int
 
 and closure = Ast.var * Ast.expr * env 
 
