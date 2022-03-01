@@ -131,6 +131,8 @@ let readint () = let _ = print_string "input> " in read_int()
 
 let do_unary = function 
   | (NEG,  INT m)  -> INT (-m)
+  | (DEC,  INT m)  -> INT (if m > 0 then m - 1 else 0)
+  | (INC,  INT m)  -> INT (m + 1)
   | (op, _) -> complain ("malformed unary operator: " ^ (string_of_unary_oper op))
 
 let do_oper = function 
