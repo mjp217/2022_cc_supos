@@ -4,7 +4,8 @@ type address = int
 type var = string 
 
 type value = 
-     | INT of int 
+     | INT of int
+     | EXP_V of int * int * int
 
 and closure = code * env 
 

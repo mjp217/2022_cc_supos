@@ -25,7 +25,8 @@ type address = int
 type var = string 
 
 type value = 
-     | INT of int 
+     | INT of int
+     | EXP_V of int * int * int
 
 and closure = code * env 
 
@@ -61,7 +62,8 @@ let string_of_list sep f l =
    in "[" ^ (aux f l) ^ "]"
 
 let rec string_of_value = function 
-     | INT n          -> string_of_int n 
+     | INT n           -> string_of_int n
+     | EXP_V (m, a, n) -> string_of_int a ^ " * (" ^ string_of_int m ^ " ^ " ^ string_of_int n ^ ")"
 
 and string_of_closure (c, env) = 
    "(" ^ (string_of_code c) ^ ", " ^ (string_of_env env) ^ ")"
@@ -136,6 +138,12 @@ let do_oper = function
   | (SUB,  INT m,   INT n)  -> INT (m - n)
   | (MUL,  INT m,   INT n)  -> INT (m * n)
   | (DIV,  INT m,   INT n)  -> INT (m / n)
+  | (EXP,  EXP_V (n, a, m), _) -> if m < 1 then INT 1
+                               else if m = 1 then INT (a * n)
+                               else EXP_V (n, a*n, m-1)
+  | (EXP,  INT m,   INT n)  -> if n < 1 then INT 1
+                               else if n = 1 then INT m
+                               else EXP_V (m, m, n-1)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
 (*
@@ -147,7 +155,8 @@ let step = function
 (* (code stack,         value/env stack, state) -> (code stack,  value/env stack, state) *)  
  | ((PUSH v) :: ds,                        evs, s) -> (ds, (V v) :: evs, s)
  | (POP :: ds,                        e :: evs, s) -> (ds, evs, s) 
- | ((UNARY op) :: ds,             (V v) :: evs, s) -> (ds, V(do_unary(op, v)) :: evs, s) 
+ | ((UNARY op) :: ds,             (V v) :: evs, s) -> (ds, V(do_unary(op, v)) :: evs, s)
+ | (ds,           (V (EXP_V (m, a, n))) :: evs, s) -> (ds, V(do_oper(EXP, EXP_V (m, a, n), INT 0)) :: evs, s)
  | ((OPER op) :: ds,   (V v2) :: (V v1) :: evs, s) -> (ds, V(do_oper(op, v1, v2)) :: evs, s)
 
  | state -> complain ("step : bad state = " ^ (string_of_interp_state state) ^ "\n")
@@ -158,7 +167,7 @@ let rec driver n state =
                              ^ " : " ^ (string_of_interp_state state) ^ "\n")
           else () 
   in match state with 
-     | ([], [V v], s) -> (v, s)  
+     | ([], [V (INT v)], s) -> (INT v, s)
      | _ -> driver (n + 1) (step state) 
 
 
