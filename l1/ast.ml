@@ -3,7 +3,7 @@ type var = string
 
 type oper = ADD | MUL | DIV | SUB | EXP
 
-type unary_oper = NEG
+type unary_oper = NEG | DEC | INC
 
 type expr = 
        | Integer of int
@@ -23,7 +23,9 @@ open Format
 *) 
 
 let pp_uop = function 
-  | NEG -> "-" 
+  | NEG -> "-"
+  | DEC -> "--"
+  | INC -> "++"
 
 
 let pp_bop = function 

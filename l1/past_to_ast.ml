@@ -5,7 +5,9 @@
 *) 
 
 let translate_uop = function 
-  | Past.NEG -> Ast.NEG 
+  | Past.NEG -> Ast.NEG
+  | Past.DEC -> Ast.DEC
+  | Past.INC -> Ast.INC
 
 let translate_bop = function 
   | Past.ADD -> Ast.ADD 

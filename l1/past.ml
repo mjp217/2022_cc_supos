@@ -20,7 +20,7 @@ type formals = (var * type_expr) list
 
 type oper = ADD | MUL | DIV | SUB | EXP
 
-type unary_oper = NEG 
+type unary_oper = NEG | DEC | INC
 
 type expr = 
        | Integer of loc * int
@@ -60,7 +60,9 @@ let rec pp_type = function
   | TEunion(t1, t2)   -> "(" ^ (pp_type t1) ^ " + " ^ (pp_type t2) ^ ")"  
 
 let pp_uop = function 
-  | NEG -> "-" 
+  | NEG -> "-"
+  | DEC -> "--"
+  | INC -> "++"
 
 let pp_bop = function 
   | ADD -> "+" 
@@ -98,7 +100,9 @@ let eprint_expr e =
 
 
 let string_of_uop = function 
-  | NEG -> "NEG" 
+  | NEG -> "NEG"
+  | DEC -> "DEC"
+  | INC -> "INC"
 
 let string_of_bop = function 
   | ADD -> "ADD" 

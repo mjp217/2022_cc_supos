@@ -3,7 +3,7 @@ type var = string
 
 type oper = ADD | MUL | DIV | SUB | EXP
 
-type unary_oper = NEG
+type unary_oper = NEG | DEC | INC
 
 type expr = 
        | Integer of int

@@ -19,6 +19,8 @@ let int_reg_exp = ['0'-'9']+
 
 	rule token = parse
 	  | [' ' '\t']     { token lexbuf }     (* skip blanks *)
+	  | "--"           { DEC }
+	  | "++"           { INC }
 	  | '+'            { ADD }
 	  | '-'            { SUB }
 	  | '*'            { MUL }
