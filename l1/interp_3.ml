@@ -27,7 +27,8 @@ type label = string
 type location = label * (address option) 
 
 type value = 
-  | INT of int 
+  | INT of int
+  | EXP_V of int * int * int
 
 and instruction = 
   | PUSH of value 
@@ -37,7 +38,8 @@ and instruction =
   | TEST of location 
   | CASE of location
   | GOTO of location
-  | LABEL of label 
+  | LABEL of label
+  | COMP
   | HALT 
 
 and code = instruction list 
@@ -66,7 +68,8 @@ let string_of_list sep f l =
    in "[" ^ (aux f l) ^ "]"
     
 let rec string_of_value = function 
-     | INT n          -> string_of_int n 
+     | INT n          -> string_of_int n
+     | EXP_V (m, a, n) -> string_of_int a ^ " * (" ^ string_of_int m ^ " ^ " ^ string_of_int n ^ ")"
 
 and string_of_closure (loc, env) = 
    "(" ^ (string_of_location loc) ^ ", " ^ (string_of_env env) ^ ")"
@@ -87,6 +90,7 @@ and string_of_instruction = function
  | TEST l   -> "TEST " ^ (string_of_location l)
  | CASE l   -> "CASE " ^ (string_of_location l)
  | GOTO l   -> "GOTO " ^ (string_of_location l)
+ | COMP     -> "COMPUTE EXPONENTIAL"
  | HALT     -> "HALT" 
 
 and string_of_code c = string_of_list "\n " string_of_instruction c 
@@ -146,6 +150,12 @@ let do_oper = function
   | (SUB,  INT m,   INT n)  -> INT (m - n)
   | (MUL,  INT m,   INT n)  -> INT (m * n)
   | (DIV,  INT m,   INT n)  -> INT (m / n)
+  | (EXP,  EXP_V (n, a, m), _) -> if m < 1 then INT 1
+                               else if m = 1 then INT (a * n)
+                               else EXP_V (n, a*n, m-1)
+  | (EXP,  INT m,   INT n)  -> if n < 1 then INT 1
+                               else if n = 1 then INT m
+                               else EXP_V (m, m, n-1)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
 
@@ -153,7 +163,10 @@ let step (cp, evs) =
  match (get_instruction cp, evs) with 
  | (PUSH v,                            evs) -> (cp + 1, (V v) :: evs)
  | (POP,                          s :: evs) -> (cp + 1, evs) 
- | (UNARY op,                 (V v) :: evs) -> (cp + 1, V(do_unary(op, v)) :: evs) 
+ | (UNARY op,                 (V v) :: evs) -> (cp + 1, V(do_unary(op, v)) :: evs)
+ (* compute exponential value before moving on *)
+ | (COMP,           (V (EXP_V (m, a, n))) :: evs) -> (cp, V(do_oper(EXP, EXP_V (m, a, n), INT 0)) :: evs)
+ | (COMP,                              evs) -> (cp + 1, evs)
  | (OPER op,       (V v2) :: (V v1) :: evs) -> (cp + 1, V(do_oper(op, v1, v2)) :: evs)
 (* new intructions *) 
  | (LABEL l,                           evs) -> (cp + 1, evs) 
@@ -171,9 +184,10 @@ let new_label =
 let rec comp = function 
   | Integer n      -> ([], [PUSH (INT n)]) 
   | UnaryOp(op, e) -> let (defs, c) = comp e in  (defs, c @ [UNARY op])
-  | Op(e1, op, e2) -> let (defs1, c1) = comp e1 in  
-                      let (defs2, c2) = comp e2 in  
-                          (defs1 @ defs2, c1 @ c2 @ [OPER op])
+  | Op(e1, op, e2) -> let (defs1, c1) = comp e1 in
+                      let (defs2, c2) = comp e2 in
+                        if op = EXP then (defs1 @ defs2, c1 @ c2 @ [OPER op; COMP])
+                        else (defs1 @ defs2, c1 @ c2 @ [OPER op])
  | Seq []         -> ([], [])  
  | Seq [e]        -> comp e
  | Seq (e ::rest) -> let (defs1, c1) = comp e in  
@@ -197,7 +211,7 @@ let rec driver n state =
      | (cp, evs) -> 
        if HALT = get_instruction cp
        then (match evs with 
-             | [V v] -> v 
+             | [V (INT v)] -> INT v
              | _ -> complain ("driver : bad halted state = " ^ (string_of_state state) ^ "\n"))
        else driver (n + 1) (step state) 
 
