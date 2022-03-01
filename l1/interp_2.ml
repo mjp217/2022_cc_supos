@@ -157,6 +157,11 @@ let step = function
  | (POP :: ds,                        e :: evs, s) -> (ds, evs, s) 
  | ((UNARY op) :: ds,             (V v) :: evs, s) -> (ds, V(do_unary(op, v)) :: evs, s)
  | (ds,           (V (EXP_V (m, a, n))) :: evs, s) -> (ds, V(do_oper(EXP, EXP_V (m, a, n), INT 0)) :: evs, s)
+ (* Potential other solution
+ | (ds,           (V (EXP_V (m, a, n))) :: evs, s) -> if n < 1 then (ds, (V (INT 1)) :: evs, s)
+                                                      else if n = 1 then (ds, (V (INT a)) :: evs, s)
+                                                      else ((OPER MUL) :: ds, (V (INT m)) :: (V (INT a)) :: (V (EXP_V (m, a, n-1))) :: evs, s)
+ *)
  | ((OPER op) :: ds,   (V v2) :: (V v1) :: evs, s) -> (ds, V(do_oper(op, v1, v2)) :: evs, s)
 
  | state -> complain ("step : bad state = " ^ (string_of_interp_state state) ^ "\n")
