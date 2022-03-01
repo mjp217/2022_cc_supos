@@ -69,7 +69,9 @@ let eprint_expr e =
 (* useful for debugging *) 
 
 let string_of_uop = function 
-  | NEG -> "NEG" 
+  | NEG -> "NEG"
+  | DEC -> "DEC"
+  | INC -> "INC"
 
 let string_of_bop = function 
   | ADD -> "ADD" 
