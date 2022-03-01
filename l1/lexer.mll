@@ -23,6 +23,7 @@ let int_reg_exp = ['0'-'9']+
 	  | '-'            { SUB }
 	  | '*'            { MUL }
 	  | '/'            { DIV }
+	  | '^'            { EXP }
 	  | '('            { LPAREN }
 	  | ')'            { RPAREN }
 	  | ';'	           { SEMICOLON }

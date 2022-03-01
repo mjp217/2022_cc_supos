@@ -1,7 +1,7 @@
 
 type var = string 
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | EXP
 
 type unary_oper = NEG
 
@@ -30,7 +30,8 @@ let pp_bop = function
   | ADD -> "+" 
   | MUL  -> "*" 
   | DIV  -> "/" 
-  | SUB -> "-" 
+  | SUB -> "-"
+  | EXP -> "^"
 
 
 let string_of_oper = pp_bop 
@@ -71,8 +72,9 @@ let string_of_uop = function
 let string_of_bop = function 
   | ADD -> "ADD" 
   | MUL  -> "MUL" 
-  | DIV  -> "DIV" 
-  | SUB -> "SUB" 
+  | DIV  -> "DIV"
+  | SUB -> "SUB"
+  | EXP -> "EXP"
 
 let mk_con con l = 
     let rec aux carry = function 

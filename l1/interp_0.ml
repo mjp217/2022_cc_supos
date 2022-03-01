@@ -52,6 +52,9 @@ let do_oper = function
   | (SUB,  INT m,   INT n)  -> INT (m - n)
   | (MUL,  INT m,   INT n)  -> INT (m * n)
   | (DIV,  INT m,   INT n)  -> INT (m / n)
+  | (EXP,  INT m,   INT n)  -> INT (let rec f a = function
+                                        | 1 -> a
+                                        | n -> a * f a (n-1) in f m n)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
 (*

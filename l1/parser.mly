@@ -7,12 +7,13 @@ let get_loc = Parsing.symbol_start_pos
 %}
 
 %token <int> INT
-%token ADD SUB MUL DIV SEMICOLON
+%token ADD SUB MUL DIV EXP SEMICOLON
 %token LPAREN RPAREN
 %token BEGIN END
 %token EOF
 %left ADD SUB        /* lowest precedence */
 %left MUL DIV         /* medium precedence */
+%left EXP
 %nonassoc UMINUS        /* highest precedence */
 
 
@@ -36,6 +37,7 @@ expr:
 | expr SUB expr                      { Past.Op(get_loc(), $1, Past.SUB, $3) }
 | expr MUL expr                      { Past.Op(get_loc(), $1, Past.MUL, $3) }
 | expr DIV expr                      { Past.Op(get_loc(), $1, Past.DIV, $3) }
+| expr EXP expr                      { Past.Op(get_loc(), $1, Past.EXP, $3) }
 | BEGIN exprlist END                 { Past.Seq(get_loc(), $2) }
 
 exprlist:

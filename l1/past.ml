@@ -18,7 +18,7 @@ type type_expr =
 
 type formals = (var * type_expr) list
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | EXP
 
 type unary_oper = NEG 
 
@@ -66,7 +66,8 @@ let pp_bop = function
   | ADD -> "+" 
   | MUL  -> "*" 
   | DIV  -> "/" 
-  | SUB -> "-" 
+  | SUB -> "-"
+  | EXP -> "*"
 
 let string_of_oper = pp_bop 
 let string_of_unary_oper = pp_uop 
@@ -104,6 +105,7 @@ let string_of_bop = function
   | MUL  -> "MUL" 
   | DIV  -> "DIV" 
   | SUB -> "SUB"
+  | EXP -> "EXP"
 
 let mk_con con l = 
     let rec aux carry = function 

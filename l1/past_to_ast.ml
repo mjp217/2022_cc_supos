@@ -12,6 +12,7 @@ let translate_bop = function
   | Past.MUL -> Ast.MUL
   | Past.DIV -> Ast.DIV
   | Past.SUB -> Ast.SUB
+  | Past.EXP -> Ast.EXP
 
 
 let rec translate_expr = function 
