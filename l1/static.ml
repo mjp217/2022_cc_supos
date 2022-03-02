@@ -47,6 +47,10 @@ let make_uop loc uop (e, t) =
     match uop, t with 
     | NEG, TEint  -> (UnaryOp(loc, uop, e), t) 
     | NEG, t'     -> report_expecting e "integer" t
+    | INC, TEint  -> (UnaryOp(loc, uop, e), t)
+    | INC, t'     -> report_expecting e "integer" t
+    | DEC, TEint  -> (UnaryOp(loc, uop, e), t)
+    | DEC, t'     -> report_expecting e "integer" t
 
 let make_bop loc bop (e1, t1) (e2, t2) = 
     match bop, t1, t2 with 
@@ -62,6 +66,9 @@ let make_bop loc bop (e1, t1) (e2, t2) =
     | DIV, TEint,  TEint  -> (Op(loc, e1, bop, e2), t1) 
     | DIV, TEint,  t      -> report_expecting e2 "integer" t
     | DIV, t,      _      -> report_expecting e1 "integer" t
+    | EXP, TEint,  TEint  -> (Op(loc, e1, bop, e2), t1)
+    | EXP, TEint,  t      -> report_expecting e2 "integer" t
+    | EXP, t,      _      -> report_expecting e1 "integer" t
 
 
 let rec  infer env e = 

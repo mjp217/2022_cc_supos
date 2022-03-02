@@ -5,13 +5,16 @@
 *) 
 
 let translate_uop = function 
-  | Past.NEG -> Ast.NEG 
+  | Past.NEG -> Ast.NEG
+  | Past.DEC -> Ast.DEC
+  | Past.INC -> Ast.INC
 
 let translate_bop = function 
   | Past.ADD -> Ast.ADD 
   | Past.MUL -> Ast.MUL
   | Past.DIV -> Ast.DIV
   | Past.SUB -> Ast.SUB
+  | Past.EXP -> Ast.EXP
 
 
 let rec translate_expr = function 

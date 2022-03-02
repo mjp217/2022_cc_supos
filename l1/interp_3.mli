@@ -6,7 +6,8 @@ type label = string
 type location = label * (address option) 
 
 type value = 
-  | INT of int 
+  | INT of int
+  | EXP_V of int * int * int
 
 and instruction = 
   | PUSH of value 
@@ -16,7 +17,8 @@ and instruction =
   | TEST of location 
   | CASE of location
   | GOTO of location
-  | LABEL of label 
+  | LABEL of label
+  | COMP
   | HALT 
 
 and code = instruction list 

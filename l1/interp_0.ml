@@ -45,6 +45,8 @@ let readint () = let _ = print_string "input> " in read_int()
 
 let do_unary = function 
   | (NEG,  INT m)  -> INT (-m)
+  | (DEC,  INT m)  -> INT (if m > 0 then m - 1 else 0)
+  | (INC,  INT m)  -> INT (m + 1)
   | (op, _) -> complain ("malformed unary operator: " ^ (string_of_unary_oper op))
 
 let do_oper = function 
@@ -52,6 +54,10 @@ let do_oper = function
   | (SUB,  INT m,   INT n)  -> INT (m - n)
   | (MUL,  INT m,   INT n)  -> INT (m * n)
   | (DIV,  INT m,   INT n)  -> INT (m / n)
+  | (EXP,  INT m,   INT n)  -> INT (let rec f a x =
+                                        if x < 1 then 1
+                                        else if x = 1 then m
+                                        else a * (f a (x-1)) in f m n)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
 (*
@@ -60,7 +66,8 @@ let do_oper = function
 *) 
 let rec interpret (e, env, store) = 
     match e with 
-	| Integer n        -> (INT n, store) 
+	| Integer n        -> (INT n, store)
+	| UnaryOp(op, e)   -> let (v, store) = interpret(e, env, store) in (do_unary(op, v), store)
     | Op(e1, op, e2)   -> let (v1, store1) = interpret(e1, env, store) in 
                           let (v2, store2) = interpret(e2, env, store1) in (do_oper(op, v1, v2), store2) 
     | Seq [e]          -> interpret (e, env, store)

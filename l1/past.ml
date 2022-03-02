@@ -18,9 +18,9 @@ type type_expr =
 
 type formals = (var * type_expr) list
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | EXP
 
-type unary_oper = NEG 
+type unary_oper = NEG | DEC | INC
 
 type expr = 
        | Integer of loc * int
@@ -60,13 +60,16 @@ let rec pp_type = function
   | TEunion(t1, t2)   -> "(" ^ (pp_type t1) ^ " + " ^ (pp_type t2) ^ ")"  
 
 let pp_uop = function 
-  | NEG -> "-" 
+  | NEG -> "-"
+  | DEC -> "--"
+  | INC -> "++"
 
 let pp_bop = function 
   | ADD -> "+" 
   | MUL  -> "*" 
   | DIV  -> "/" 
-  | SUB -> "-" 
+  | SUB -> "-"
+  | EXP -> "*"
 
 let string_of_oper = pp_bop 
 let string_of_unary_oper = pp_uop 
@@ -97,13 +100,16 @@ let eprint_expr e =
 
 
 let string_of_uop = function 
-  | NEG -> "NEG" 
+  | NEG -> "NEG"
+  | DEC -> "DEC"
+  | INC -> "INC"
 
 let string_of_bop = function 
   | ADD -> "ADD" 
   | MUL  -> "MUL" 
   | DIV  -> "DIV" 
   | SUB -> "SUB"
+  | EXP -> "EXP"
 
 let mk_con con l = 
     let rec aux carry = function 

@@ -1,9 +1,9 @@
 
 type var = string 
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | EXP
 
-type unary_oper = NEG
+type unary_oper = NEG | DEC | INC
 
 type expr = 
        | Integer of int
@@ -23,14 +23,17 @@ open Format
 *) 
 
 let pp_uop = function 
-  | NEG -> "-" 
+  | NEG -> "-"
+  | DEC -> "--"
+  | INC -> "++"
 
 
 let pp_bop = function 
   | ADD -> "+" 
   | MUL  -> "*" 
   | DIV  -> "/" 
-  | SUB -> "-" 
+  | SUB -> "-"
+  | EXP -> "^"
 
 
 let string_of_oper = pp_bop 
@@ -66,13 +69,16 @@ let eprint_expr e =
 (* useful for debugging *) 
 
 let string_of_uop = function 
-  | NEG -> "NEG" 
+  | NEG -> "NEG"
+  | DEC -> "DEC"
+  | INC -> "INC"
 
 let string_of_bop = function 
   | ADD -> "ADD" 
   | MUL  -> "MUL" 
-  | DIV  -> "DIV" 
-  | SUB -> "SUB" 
+  | DIV  -> "DIV"
+  | SUB -> "SUB"
+  | EXP -> "EXP"
 
 let mk_con con l = 
     let rec aux carry = function 

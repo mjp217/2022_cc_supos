@@ -1,3 +1,5 @@
 sum1 6
 multisum1 27
 seq1 7
+exp1 125
+unary1 4
