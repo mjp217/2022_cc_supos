@@ -14,7 +14,7 @@ type type_expr =
    | TEproduct of type_expr * type_expr
    | TEunion of type_expr * type_expr
 
-type oper = ADD | MUL | DIV | SUB
+type oper = ADD | MUL | DIV | SUB | GTEQ
 
 type unary_oper = NEG 
 
@@ -23,6 +23,7 @@ type expr =
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
 	   | Seq of loc * (expr list)
+       | If of loc * expr * expr * expr
 
 val loc_of_expr : expr -> loc 
 val string_of_loc : loc -> string 

@@ -24,6 +24,7 @@ type store = address -> value
 
 and value = 
      | INT of int 
+     | BOOL of bool
 
 type env = var -> value 
 
@@ -52,6 +53,7 @@ let do_oper = function
   | (SUB,  INT m,   INT n)  -> INT (m - n)
   | (MUL,  INT m,   INT n)  -> INT (m * n)
   | (DIV,  INT m,   INT n)  -> INT (m / n)
+  | (GTEQ, INT m,   INT n)  -> BOOL (m >= n)
   | (op, _, _)  -> complain ("malformed binary operator: " ^ (string_of_oper op))
 
 (*
@@ -66,6 +68,7 @@ let rec interpret (e, env, store) =
     | Seq [e]          -> interpret (e, env, store)
     | Seq (e :: rest)  -> let (_,  store1) = interpret(e, env, store) 
                           in interpret(Seq rest, env, store1) 
+    | If(e1, e2, e3)   -> let (BOOL v1, store1) = interpret(e1, env, store) in if v1 then interpret(e2, env, store1) else interpret(e3, env, store1)
 
 (* env_empty : env *) 
 let empty_env = fun x -> complain (x ^ " is not defined!\n")

@@ -18,7 +18,7 @@ type type_expr =
 
 type formals = (var * type_expr) list
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | GTEQ
 
 type unary_oper = NEG 
 
@@ -27,6 +27,7 @@ type expr =
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
        | Seq of loc * (expr list)
+       | If of loc * expr * expr * expr
 
 
 and lambda = var * type_expr * expr 

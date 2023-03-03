@@ -26,6 +26,10 @@ let int_reg_exp = ['0'-'9']+
 	  | '('            { LPAREN }
 	  | ')'            { RPAREN }
 	  | ';'	           { SEMICOLON }
+	  | ">="		   { GTEQ }
+	  | "if"		   { IF }
+	  | "then"		   { THEN }
+	  | "else"		   { ELSE }
 	  | "begin"        { BEGIN }
 	  | "end"          { END }
 	  | eof            { EOF }  

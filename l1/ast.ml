@@ -1,7 +1,7 @@
 
 type var = string 
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | GTEQ
 
 type unary_oper = NEG
 
@@ -10,6 +10,7 @@ type expr =
        | UnaryOp of unary_oper * expr
        | Op of expr * oper * expr
        | Seq of (expr list)
+       | If of expr * expr * expr
 
 and lambda = var * expr 
 
