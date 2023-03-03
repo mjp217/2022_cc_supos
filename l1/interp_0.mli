@@ -4,6 +4,7 @@ type store = address -> value
 
 and value = 
      | INT of int 
+     | BOOL of bool
 
 type env = Ast.var -> value 
 

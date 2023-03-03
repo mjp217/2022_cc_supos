@@ -62,6 +62,9 @@ let make_bop loc bop (e1, t1) (e2, t2) =
     | DIV, TEint,  TEint  -> (Op(loc, e1, bop, e2), t1) 
     | DIV, TEint,  t      -> report_expecting e2 "integer" t
     | DIV, t,      _      -> report_expecting e1 "integer" t
+    | GREQ, TEint,  TEint  -> (Op(loc, e1, bop, e2), t1) 
+    | GREQ, TEint,  t      -> report_expecting e2 "integer" t
+    | GREQ, t,      _      -> report_expecting e1 "integer" t
 
 
 let rec  infer env e = 
