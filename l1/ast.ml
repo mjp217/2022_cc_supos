@@ -39,6 +39,7 @@ let pp_bop = function
   | MUL  -> "*" 
   | DIV  -> "/" 
   | SUB -> "-" 
+  | GREQ -> ">=" 
 
 
 let string_of_oper = pp_bop 

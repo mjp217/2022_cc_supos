@@ -7,6 +7,7 @@ type location = label * (address option)
 
 type value = 
   | INT of int 
+  | BOOL of bool
 
 and instruction = 
   | PUSH of value 
