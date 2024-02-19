@@ -18,24 +18,37 @@ type type_expr =
 
 type formals = (var * type_expr) list
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | GREQ 
 
-type unary_oper = NEG 
+type unary_oper = NEG
+
+type ident = ID of string
 
 type expr = 
        | Integer of loc * int
+       | Bool of loc * bool
+       | Ident of loc * ident
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
        | Seq of loc * (expr list)
-
+       | If of loc * expr * expr * expr
+       | While of loc * (expr list) * (expr list)
+       | Assign of loc * ident * expr
+       | Deref of loc * ident
 
 and lambda = var * type_expr * expr 
 
 let  loc_of_expr = function 
     | Integer (loc, _)              -> loc 
+    | Bool (loc, _)              -> loc 
+    | Ident (loc, _)              -> loc 
     | UnaryOp(loc, _, _)            -> loc 
     | Op(loc, _, _, _)              -> loc 
 	| Seq(loc, _)                   -> loc
+	| If(loc, _, _, _)                   -> loc
+	| While(loc, _, _)                   -> loc
+	| Assign(loc, _, _)                   -> loc
+	| Deref(loc, _)                   -> loc
 
 
 let string_of_loc loc = 
@@ -79,6 +92,7 @@ let pp_binary ppf op = fstring ppf (pp_bop op)
 (* ignore locations *) 
 let rec pp_expr ppf = function 
     | Integer (_, n)      -> fstring ppf (string_of_int n)
+    | Bool (_, n)         -> fstring ppf (string_of_bool n)
     | UnaryOp(_, op, e)   -> fprintf ppf "%a(%a)" pp_unary op pp_expr e 
     | Op(_, e1, op, e2)   -> fprintf ppf "(%a %a %a)" pp_expr e1  pp_binary op pp_expr e2 
     | Seq (_, [])         -> () 
