@@ -18,24 +18,31 @@ type type_expr =
 
 type formals = (var * type_expr) list
 
-type oper = ADD | MUL | DIV | SUB 
+type oper = ADD | MUL | DIV | SUB | GEQ | ASSIGN
 
-type unary_oper = NEG 
+type unary_oper = DEREF 
 
 type expr = 
        | Integer of loc * int
+       | Boolean of loc * bool
+       | Skip of loc
+       | Identifier of loc * string
        | UnaryOp of loc * unary_oper * expr
        | Op of loc * expr * oper * expr
        | Seq of loc * (expr list)
-
-
-and lambda = var * type_expr * expr 
+       | If of loc * expr * expr * expr
+       | While of loc * expr * expr
 
 let  loc_of_expr = function 
     | Integer (loc, _)              -> loc 
+    | Boolean(loc, _)               -> loc
+    | Skip (loc)                    -> loc 
+    | Identifier (loc, _)           -> loc 
     | UnaryOp(loc, _, _)            -> loc 
     | Op(loc, _, _, _)              -> loc 
-	| Seq(loc, _)                   -> loc
+	  | Seq(loc, _)                   -> loc
+    | If (loc, _, _, _)             -> loc
+    | While (loc, _, _)             -> loc
 
 
 let string_of_loc loc = 
@@ -60,13 +67,15 @@ let rec pp_type = function
   | TEunion(t1, t2)   -> "(" ^ (pp_type t1) ^ " + " ^ (pp_type t2) ^ ")"  
 
 let pp_uop = function 
-  | NEG -> "-" 
+  | DEREF -> "!" 
 
 let pp_bop = function 
   | ADD -> "+" 
   | MUL  -> "*" 
   | DIV  -> "/" 
   | SUB -> "-" 
+  | GEQ -> ">="
+  | ASSIGN -> ":="
 
 let string_of_oper = pp_bop 
 let string_of_unary_oper = pp_uop 
@@ -79,11 +88,16 @@ let pp_binary ppf op = fstring ppf (pp_bop op)
 (* ignore locations *) 
 let rec pp_expr ppf = function 
     | Integer (_, n)      -> fstring ppf (string_of_int n)
+    | Boolean (_, b)      -> fstring ppf (string_of_bool b)
+    | Skip (_)            -> fstring ppf "skip"
+    | Identifier (_, i)   -> fstring ppf i
     | UnaryOp(_, op, e)   -> fprintf ppf "%a(%a)" pp_unary op pp_expr e 
     | Op(_, e1, op, e2)   -> fprintf ppf "(%a %a %a)" pp_expr e1  pp_binary op pp_expr e2 
     | Seq (_, [])         -> () 
     | Seq (_, [e])        -> pp_expr ppf e 
     | Seq (l, e :: rest)  -> fprintf ppf "%a; %a" pp_expr e pp_expr (Seq(l, rest))	
+    | If (_, e1, e2, e3)  -> fprintf ppf "(if %a then %a else %a)" pp_expr e1  pp_expr e2  pp_expr e3
+    | While (_, e1, e2)  -> fprintf ppf "(while %a do %a)" pp_expr e1  pp_expr e2
 
 let print_expr e = 
     let _ = pp_expr std_formatter e
@@ -97,13 +111,15 @@ let eprint_expr e =
 
 
 let string_of_uop = function 
-  | NEG -> "NEG" 
+  | DEREF -> "DEREF" 
 
 let string_of_bop = function 
   | ADD -> "ADD" 
   | MUL  -> "MUL" 
   | DIV  -> "DIV" 
   | SUB -> "SUB"
+  | GEQ -> "GEQ"
+  | ASSIGN -> "ASSIGN"
 
 let mk_con con l = 
     let rec aux carry = function 
@@ -123,9 +139,14 @@ let rec string_of_type = function
 
 let rec string_of_expr = function 
     | Integer (_, n)      -> mk_con "Integer" [string_of_int n] 
+    | Boolean (_, b)      -> mk_con "Boolean" [string_of_bool b]
+    | Skip (_)            -> mk_con "Skip" ["skip"]
+    | Identifier (_, i)   -> mk_con "Identifier" [i]
     | UnaryOp(_, op, e)   -> mk_con "UnaryOp" [string_of_uop op; string_of_expr e]
     | Op(_, e1, op, e2)   -> mk_con "Op" [string_of_expr e1; string_of_bop op; string_of_expr e2]
     | Seq (_, el)         -> mk_con "Seq" [string_of_expr_list el]
+    | If (_, e1, e2, e3)  -> mk_con "If" [string_of_expr e1; string_of_expr e2; string_of_expr e3]
+    | While (_, e1, e2)   -> mk_con "While" [string_of_expr e1; string_of_expr e2]
 
 
 and string_of_expr_list = function 
